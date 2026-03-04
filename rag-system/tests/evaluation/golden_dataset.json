@@ -1,0 +1,92 @@
+[
+  {
+    "id": "eval_001",
+    "query": "What is a transformer in machine learning?",
+    "expected_answer": "A transformer is a deep learning architecture that uses self-attention mechanisms to process sequential data in parallel, introduced in 'Attention is All You Need' by Vaswani et al.",
+    "expected_sources": ["doc_attention_paper"],
+    "expected_chunks": ["chunk_transformer_intro"],
+    "category": "technical_explanation",
+    "difficulty": "easy"
+  },
+  {
+    "id": "eval_002",
+    "query": "Who invented the transformer architecture?",
+    "expected_answer": "The transformer architecture was introduced by Vaswani et al. from Google Brain in 2017 in the paper 'Attention is All You Need'.",
+    "expected_sources": ["doc_attention_paper"],
+    "expected_chunks": ["chunk_transformer_intro"],
+    "category": "factual",
+    "difficulty": "easy"
+  },
+  {
+    "id": "eval_003",
+    "query": "What is retrieval-augmented generation (RAG)?",
+    "expected_answer": "RAG is a technique that combines a retrieval system with a language model. It retrieves relevant documents from a knowledge base and uses them as context for generating answers, improving factual accuracy.",
+    "expected_sources": ["doc_rag_paper"],
+    "expected_chunks": ["chunk_rag_overview"],
+    "category": "technical_explanation",
+    "difficulty": "easy"
+  },
+  {
+    "id": "eval_004",
+    "query": "What is BM25 used for?",
+    "expected_answer": "BM25 (Best Match 25) is a ranking function used in information retrieval to measure the relevance of documents to a query based on term frequency and inverse document frequency.",
+    "expected_sources": ["doc_information_retrieval"],
+    "expected_chunks": ["chunk_bm25"],
+    "category": "technical_explanation",
+    "difficulty": "medium"
+  },
+  {
+    "id": "eval_005",
+    "query": "What is Reciprocal Rank Fusion?",
+    "expected_answer": "Reciprocal Rank Fusion (RRF) is a method for combining ranked results from multiple retrieval systems. The score is computed as the sum of 1/(k + rank_i) for each ranking list, where k is typically 60.",
+    "expected_sources": ["doc_hybrid_search"],
+    "expected_chunks": ["chunk_rrf"],
+    "category": "technical_explanation",
+    "difficulty": "hard"
+  },
+  {
+    "id": "eval_006",
+    "query": "What are the advantages of vector embeddings?",
+    "expected_answer": "Vector embeddings capture semantic meaning, enabling similarity search that goes beyond keyword matching. They represent words or documents as dense numerical vectors in a high-dimensional space.",
+    "expected_sources": ["doc_embeddings"],
+    "expected_chunks": ["chunk_embeddings_overview"],
+    "category": "technical_explanation",
+    "difficulty": "medium"
+  },
+  {
+    "id": "eval_007",
+    "query": "What is cosine similarity?",
+    "expected_answer": "Cosine similarity measures the cosine of the angle between two vectors. It ranges from -1 to 1, where 1 means identical direction (most similar), 0 means orthogonal, and -1 means opposite.",
+    "expected_sources": ["doc_embeddings"],
+    "expected_chunks": ["chunk_cosine_similarity"],
+    "category": "factual",
+    "difficulty": "easy"
+  },
+  {
+    "id": "eval_008",
+    "query": "What is chunking in RAG systems?",
+    "expected_answer": "Chunking is the process of splitting documents into smaller pieces (chunks) for indexing. Common strategies include fixed-size chunking, semantic chunking (sentence boundaries), and syntax-aware chunking for code.",
+    "expected_sources": ["doc_rag_implementation"],
+    "expected_chunks": ["chunk_chunking_strategies"],
+    "category": "technical_explanation",
+    "difficulty": "medium"
+  },
+  {
+    "id": "eval_009",
+    "query": "What is a cross-encoder reranker?",
+    "expected_answer": "A cross-encoder reranker jointly encodes a query and document together to produce a relevance score. Unlike bi-encoders, cross-encoders attend across both inputs, giving higher quality scores at the cost of being slower.",
+    "expected_sources": ["doc_reranking"],
+    "expected_chunks": ["chunk_cross_encoder"],
+    "category": "technical_explanation",
+    "difficulty": "hard"
+  },
+  {
+    "id": "eval_010",
+    "query": "What is hallucination in language models?",
+    "expected_answer": "Hallucination occurs when a language model generates information that is factually incorrect but presented confidently. RAG mitigates this by grounding responses in retrieved documents.",
+    "expected_sources": ["doc_llm_problems"],
+    "expected_chunks": ["chunk_hallucination"],
+    "category": "factual",
+    "difficulty": "easy"
+  }
+]

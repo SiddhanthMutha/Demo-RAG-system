@@ -1,0 +1,50 @@
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.pytest_cache
+
+# Type checking
+.mypy_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Data (don't commit large files)
+data/raw/
+data/processed/
+*.pdf
+*.csv
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Evaluation outputs
+evaluation_results.md
