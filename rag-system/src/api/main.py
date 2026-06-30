@@ -8,11 +8,12 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from src.api.middleware.error_handling import ErrorHandlingMiddleware
 from src.api.middleware.logging import LoggingMiddleware
-from src.api.routes import health, ingest, query
+from src.api.routes import documents, health, ingest, query, views, eval as eval_routes
 from src.config import settings
 
 
@@ -101,6 +102,14 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(ingest.router)
 app.include_router(query.router)
+app.include_router(documents.router)
+app.include_router(views.router)
+app.include_router(eval_routes.router)
+
+from pathlib import Path
+_static_dir = Path(__file__).resolve().parent.parent / "static"
+if _static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 
 # ------------------------------------------------------------------

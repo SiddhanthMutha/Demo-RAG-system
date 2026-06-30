@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Ingestion | RAG System{% endblock %}
+{% block content %}
+<section class="split">
+    <article class="card">
+        <div class="inline-meta">
+            <span class="pill">Source or URL</span>
+            <span class="pill">Server-rendered results</span>
+        </div>
+        <h2>Ingestion</h2>
+        <p class="muted">Add a document by source path or URL, or upload a PDF directly.</p>
+
+        <form
+            hx-post="/web/ingest/source"
+            hx-target="#ingest-source-result"
+            hx-swap="innerHTML"
+        >
+            <label>
+                Source
+                <input type="text" name="source" placeholder="/data/handbook.pdf or https://example.com/page" required>
+            </label>
+            <div class="grid two">
+                <label>
+                    Document Type
+                    <select name="doc_type">
+                        <option value="pdf">PDF</option>
+                        <option value="web">Web</option>
+                        <option value="code">Code</option>
+                        <option value="markdown">Markdown</option>
+                    </select>
+                </label>
+                <label>
+                    Chunking Strategy
+                    <select name="chunking_strategy">
+                        <option value="semantic">Semantic</option>
+                        <option value="fixed_size">Fixed size</option>
+                        <option value="syntax_aware">Syntax aware</option>
+                    </select>
+                </label>
+            </div>
+            <button type="submit">
+                Ingest Source
+                <span class="htmx-indicator">...</span>
+            </button>
+        </form>
+    </article>
+
+    <article class="card">
+        <div class="inline-meta">
+            <span class="pill">PDF upload</span>
+            <span class="pill">FastAPI multipart</span>
+        </div>
+        <h2>Upload PDF</h2>
+        <form
+            hx-post="/web/ingest/upload"
+            hx-encoding="multipart/form-data"
+            hx-target="#ingest-upload-result"
+            hx-swap="innerHTML"
+        >
+            <label>
+                PDF File
+                <input type="file" name="file" accept=".pdf" required>
+            </label>
+            <label>
+                Chunking Strategy
+                <select name="chunking_strategy">
+                    <option value="semantic">Semantic</option>
+                    <option value="fixed_size">Fixed size</option>
+                </select>
+            </label>
+            <button type="submit">
+                Upload and Ingest
+                <span class="htmx-indicator">...</span>
+            </button>
+        </form>
+    </article>
+</section>
+
+<section class="grid two">
+    <article class="card">
+        <h3>Recent source ingestion</h3>
+        <div id="ingest-source-result" class="empty-state">A normalized result card will appear here.</div>
+    </article>
+
+    <article class="card">
+        <h3>Recent upload ingestion</h3>
+        <div id="ingest-upload-result" class="empty-state">A normalized result card will appear here.</div>
+    </article>
+</section>
+{% endblock %}

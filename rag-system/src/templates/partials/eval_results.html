@@ -1,0 +1,47 @@
+<div class="grid">
+    <div class="inline-meta">
+        <span class="pill">run_id={{ result.run_id }}</span>
+        <span class="pill">{{ result.dataset_type }}</span>
+        <span class="pill">{{ result.model }}</span>
+        <span class="pill">{{ result.num_queries }} queries</span>
+    </div>
+
+    <div class="metric-grid">
+        {% for metric_name, metric_value in result.metrics.items() %}
+        <div class="metric-card">
+            <strong>
+                {% if metric_name == "num_queries" %}
+                {{ metric_value|int }}
+                {% else %}
+                {{ "%.3f"|format(metric_value) }}
+                {% endif %}
+            </strong>
+            <span>{{ metric_name }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <h3>Per-query summary</h3>
+        {% if result.queries %}
+        <div class="list">
+            {% for item in result.queries %}
+            <div class="result-item">
+                <strong>{{ item.query }}</strong>
+                <p>{{ item.answer }}</p>
+                <div class="inline-meta">
+                    <span class="pill">p@k={{ "%.3f"|format(item.precision_at_k) }}</span>
+                    <span class="pill">r@k={{ "%.3f"|format(item.recall_at_k) }}</span>
+                    <span class="pill">mrr={{ "%.3f"|format(item.mrr) }}</span>
+                    <span class="pill">ndcg={{ "%.3f"|format(item.ndcg) }}</span>
+                    <span class="pill">faithful={{ item.faithfulness }}</span>
+                    <span class="pill">correct={{ item.correctness }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">No per-query rows were produced.</div>
+        {% endif %}
+    </div>
+</div>

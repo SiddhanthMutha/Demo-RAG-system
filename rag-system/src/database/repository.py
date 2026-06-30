@@ -2,10 +2,11 @@
 Database repository: async CRUD operations for all entities.
 """
 import hashlib
+from collections import defaultdict
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import ChunkRecord, DocumentRecord, EvaluationResult, QueryLog
@@ -39,7 +40,7 @@ class DocumentRepository:
             content_hash=self._hash_content(doc.content),
             doc_type=doc.doc_type.value,
             source=doc.source,
-            metadata=doc.metadata,
+            doc_metadata=doc.metadata,
             created_at=doc.created_at,
         )
         self.session.add(record)
@@ -56,7 +57,7 @@ class DocumentRepository:
                 embedding=chunk.embedding,
                 token_count=chunk.token_count,
                 chunk_index=chunk.chunk_index,
-                metadata=chunk.metadata,
+                chunk_metadata=chunk.metadata,
             )
             for chunk in chunks
         ]
@@ -79,6 +80,39 @@ class DocumentRepository:
         await self.session.delete(record)
         await self.session.flush()
         return True
+
+    async def list_documents(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Return documents with chunk counts, newest first."""
+        stmt = (
+            select(
+                DocumentRecord.id,
+                DocumentRecord.source,
+                DocumentRecord.doc_type,
+                DocumentRecord.created_at,
+                func.count(ChunkRecord.id).label("chunk_count"),
+            )
+            .outerjoin(ChunkRecord, ChunkRecord.document_id == DocumentRecord.id)
+            .group_by(
+                DocumentRecord.id,
+                DocumentRecord.source,
+                DocumentRecord.doc_type,
+                DocumentRecord.created_at,
+            )
+            .order_by(DocumentRecord.created_at.desc())
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        rows = result.all()
+        return [
+            {
+                "id": row.id,
+                "source": row.source,
+                "doc_type": row.doc_type,
+                "created_at": row.created_at,
+                "chunk_count": int(row.chunk_count or 0),
+            }
+            for row in rows
+        ]
 
 
 class QueryRepository:
@@ -138,3 +172,58 @@ class EvaluationRepository:
         self.session.add(result)
         await self.session.flush()
         return result
+
+    async def list_results(self, limit: int = 100) -> List[EvaluationResult]:
+        """Return raw evaluation rows, newest first."""
+        result = await self.session.execute(
+            select(EvaluationResult)
+            .order_by(EvaluationResult.created_at.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def list_grouped_runs(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Group flat metric rows into evaluation runs using details.run_id.
+
+        Rows without run_id are grouped under their record id so legacy data remains visible.
+        """
+        rows = await self.list_results(limit=max(limit * 12, 100))
+        grouped: Dict[str, List[EvaluationResult]] = defaultdict(list)
+        for row in rows:
+            run_id = (row.details or {}).get("run_id") or row.id
+            grouped[str(run_id)].append(row)
+
+        runs: List[Dict[str, Any]] = []
+        for run_id, run_rows in grouped.items():
+            ordered_rows = sorted(
+                run_rows,
+                key=lambda item: item.created_at.isoformat() if item.created_at else "",
+                reverse=True,
+            )
+            first = ordered_rows[0]
+            details = first.details or {}
+            metrics = {row.metric_name: row.metric_value for row in ordered_rows}
+            runs.append(
+                {
+                    "run_id": run_id,
+                    "test_name": first.test_name,
+                    "created_at": first.created_at,
+                    "details": details,
+                    "metrics": metrics,
+                }
+            )
+
+        runs.sort(
+            key=lambda item: item["created_at"].isoformat() if item["created_at"] else "",
+            reverse=True,
+        )
+        return runs[:limit]
+
+    async def get_run_details(self, run_id: str) -> Optional[Dict[str, Any]]:
+        """Return a single grouped run if present."""
+        runs = await self.list_grouped_runs(limit=100)
+        for run in runs:
+            if run["run_id"] == run_id:
+                return run
+        return None

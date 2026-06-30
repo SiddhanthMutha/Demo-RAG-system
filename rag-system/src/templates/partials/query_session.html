@@ -1,0 +1,19 @@
+<div class="grid" data-query-stream="true" data-stream-url="{{ stream_url }}">
+    <div class="inline-meta">
+        <span class="pill">{{ model }}</span>
+        <span class="pill">top_k={{ top_k }}</span>
+        <span class="pill" data-role="status">Preparing stream...</span>
+    </div>
+    <div class="result-item">
+        <strong>Question</strong>
+        <p>{{ query }}</p>
+    </div>
+    <div>
+        <h3>Answer</h3>
+        <div class="stream-box" data-role="output"></div>
+    </div>
+    <div>
+        <h3>Sources</h3>
+        <div data-role="sources" class="list"></div>
+    </div>
+</div>

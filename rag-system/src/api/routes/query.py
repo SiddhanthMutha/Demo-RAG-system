@@ -1,12 +1,13 @@
 """
-Query routes: synchronous query endpoint and WebSocket streaming endpoint.
+Query routes: synchronous query endpoint, WebSocket streaming, and SSE streaming.
 """
 import json
 import time
-from typing import Optional
+from typing import AsyncGenerator, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
+from fastapi.responses import StreamingResponse
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -242,3 +243,84 @@ async def query_stream(websocket: WebSocket) -> None:
     except Exception as e:
         logger.error("WebSocket query error", error=str(e))
         await handler.send_error(f"Internal error: {e}")
+
+
+# ------------------------------------------------------------------
+# SSE streaming endpoint
+# ------------------------------------------------------------------
+
+@router.get("/query/stream/sse", summary="Streaming query via Server-Sent Events")
+async def query_stream_sse(
+    query: str = Query(..., min_length=1),
+    top_k: int = Query(default=5, ge=1, le=20),
+    model: str = Query(default="gpt-3.5-turbo"),
+    filters: Optional[str] = Query(default=None),
+) -> StreamingResponse:
+    """
+    Streaming query endpoint using Server-Sent Events.
+
+    Event types:
+        data: {"type": "token",   "data": "<token>"}
+        data: {"type": "sources", "data": [...]}
+        data: {"type": "done",    "data": null}
+        data: {"type": "error",   "data": "<message>"}
+    """
+    filters_dict = json.loads(filters) if filters else None
+
+    async def event_stream() -> AsyncGenerator[str, None]:
+        try:
+            raw_results = await _run_retrieval(query, top_k, filters_dict)
+
+            if not raw_results:
+                yield f"data: {json.dumps({'type': 'token', 'data': 'I could not find relevant information in the knowledge base.'})}\n\n"
+                yield f"data: {json.dumps({'type': 'sources', 'data': []})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'data': None})}\n\n"
+                return
+
+            provider = "openai"
+            actual_model = model
+            if model == "claude-3-5-sonnet":
+                provider = "anthropic"
+                actual_model = "claude-3-5-sonnet-20241022"
+
+            ctx_manager = ContextManager(model_name=actual_model)
+            selected_chunks, _ = ctx_manager.fit_context(
+                chunks=raw_results, system_prompt=SYSTEM_PROMPT, query=query
+            )
+            if not selected_chunks:
+                selected_chunks = raw_results[:top_k]
+
+            prompt = build_rag_prompt(query=query, retrieved_chunks=selected_chunks)
+
+            llm = LLMClient(provider=provider, model=actual_model)
+            token_stream = llm.generate_stream(prompt=prompt, system_prompt=SYSTEM_PROMPT)
+
+            async for token in token_stream:
+                yield f"data: {json.dumps({'type': 'token', 'data': token})}\n\n"
+
+            sources_data = [
+                {
+                    "chunk_id": s.chunk_id,
+                    "content": s.content[:300],
+                    "score": round(s.score, 4),
+                    "document_source": s.document_source,
+                    "metadata": s.metadata,
+                }
+                for s in selected_chunks
+            ]
+            yield f"data: {json.dumps({'type': 'sources', 'data': sources_data})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'data': None})}\n\n"
+
+        except Exception as e:
+            logger.error("SSE query error", error=str(e))
+            yield f"data: {json.dumps({'type': 'error', 'data': str(e)})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

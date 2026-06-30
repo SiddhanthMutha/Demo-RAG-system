@@ -1,0 +1,16 @@
+<div class="grid">
+    <div class="inline-meta">
+        <span class="pill">run_id={{ run.run_id }}</span>
+        <span class="pill">{{ run.details.get("suite_type", "full") }}</span>
+        <span class="pill">{{ run.details.get("dataset_type", "unknown") }}</span>
+        <span class="pill">{{ run.details.get("num_queries", 0) }} queries</span>
+    </div>
+    <div class="metric-grid">
+        {% for metric_name, metric_value in run.metrics.items() %}
+        <div class="metric-card">
+            <strong>{{ "%.3f"|format(metric_value) }}</strong>
+            <span>{{ metric_name }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>

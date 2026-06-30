@@ -1,0 +1,36 @@
+{% if runs %}
+<div class="list">
+    {% for run in runs %}
+    <div class="history-item">
+        <div class="inline-meta">
+            <span class="pill">{{ run.run_id }}</span>
+            <span class="pill">{{ run.details.get("dataset_type", "unknown") }}</span>
+            <span class="pill">{{ run.details.get("model", "unknown") }}</span>
+            <span class="pill">{{ run.created_at.strftime("%Y-%m-%d %H:%M") if run.created_at else "n/a" }}</span>
+        </div>
+        <div class="metric-grid">
+            {% for metric_name, metric_value in run.metrics.items() %}
+            {% if metric_name in ["precision_at_k", "recall_at_k", "mrr", "ndcg", "correctness_rate", "faithfulness_rate"] %}
+            <div class="metric-card">
+                <strong>{{ "%.3f"|format(metric_value) }}</strong>
+                <span>{{ metric_name }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div style="margin-top: 12px;">
+            <button
+                class="secondary"
+                hx-get="/web/eval/run/{{ run.run_id }}"
+                hx-target="#eval-results"
+                hx-swap="innerHTML"
+            >
+                View Run Detail
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">No evaluation runs have been recorded yet.</div>
+{% endif %}

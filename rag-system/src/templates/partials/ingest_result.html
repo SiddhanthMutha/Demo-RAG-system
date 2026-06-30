@@ -1,0 +1,18 @@
+<div class="result-item">
+    <div class="inline-meta">
+        <span class="pill">{{ result.status }}</span>
+        <span class="pill">{{ result.chunks_created }} chunks</span>
+    </div>
+    <strong>Document ID</strong>
+    <p>{{ result.document_id }}</p>
+    {% if result.errors %}
+    <strong>Warnings</strong>
+    <div class="list">
+        {% for error in result.errors %}
+        <div class="source-item">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="status-ok">Completed without warnings.</p>
+    {% endif %}
+</div>

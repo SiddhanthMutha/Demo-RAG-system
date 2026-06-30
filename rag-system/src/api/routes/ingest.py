@@ -55,6 +55,13 @@ async def ingest_document(
     request: IngestionRequest,
     session: AsyncSession = Depends(get_session),
 ) -> IngestionResponse:
+    return await perform_ingestion(request, session)
+
+
+async def perform_ingestion(
+    request: IngestionRequest,
+    session: AsyncSession,
+) -> IngestionResponse:
     """
     Ingest a document into the RAG system.
 
@@ -161,7 +168,10 @@ async def ingest_upload(
         raise HTTPException(status_code=422, detail="Only PDF files are supported for upload.")
 
     # Save to temp location in data/raw/
-    import tempfile, shutil
+    import shutil
+    import tempfile
+
+    Path("data/raw").mkdir(parents=True, exist_ok=True)
 
     with tempfile.NamedTemporaryFile(
         delete=False, suffix=".pdf", dir="data/raw", prefix="upload_"

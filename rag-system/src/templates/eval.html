@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Evaluation | RAG System{% endblock %}
+{% block content %}
+<section class="split">
+    <article class="card">
+        <div class="inline-meta">
+            <span class="pill">Full suite</span>
+            <span class="pill">Synthetic Q&A</span>
+        </div>
+        <h2>Evaluation Dashboard</h2>
+        <p class="muted">Run retrieval, generation, and end-to-end evaluation against synthetic Q&A generated from ingested chunks.</p>
+
+        <form
+            hx-post="/web/eval/run"
+            hx-target="#eval-results"
+            hx-swap="innerHTML"
+        >
+            <input type="hidden" name="synthetic" value="true">
+            <div class="grid two">
+                <label>
+                    Top K
+                    <input type="number" name="top_k" min="1" max="20" value="5">
+                </label>
+                <label>
+                    Model
+                    <select name="model">
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-4">GPT-4</option>
+                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+                    </select>
+                </label>
+            </div>
+            <div class="grid two">
+                <label>
+                    Max Q&A pairs
+                    <input type="number" name="max_qa_pairs" min="1" max="100" value="20">
+                </label>
+                <label>
+                    Sample size
+                    <input type="number" name="sample_size" min="1" max="200" value="20">
+                </label>
+            </div>
+            <button type="submit">
+                Run Full Evaluation
+                <span class="htmx-indicator">...</span>
+            </button>
+        </form>
+    </article>
+
+    <article class="card">
+        <h3>Coverage</h3>
+        <div class="list">
+            <div class="result-item">
+                <strong>Retrieval</strong>
+                <p class="muted">Precision@k, Recall@k, MRR, and nDCG.</p>
+            </div>
+            <div class="result-item">
+                <strong>Generation</strong>
+                <p class="muted">Correctness rate and faithfulness rate over synthetic answers.</p>
+            </div>
+            <div class="result-item">
+                <strong>Operational</strong>
+                <p class="muted">Average latency, total cost, and query count for each run.</p>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section id="eval-results" class="card">
+    <div class="empty-state">Run an evaluation to see grouped metrics and recent history.</div>
+</section>
+
+<section class="card">
+    <h3>Recent runs</h3>
+    <div
+        id="eval-history"
+        hx-get="/web/eval/history"
+        hx-trigger="load"
+        hx-swap="innerHTML"
+    >
+        <div class="empty-state">Loading evaluation history...</div>
+    </div>
+</section>
+{% endblock %}

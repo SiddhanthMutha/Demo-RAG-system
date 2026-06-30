@@ -1,0 +1,22 @@
+{% if documents %}
+<div class="table">
+    <div class="table-row header">
+        <div>ID</div>
+        <div>Source</div>
+        <div>Type</div>
+        <div>Created</div>
+        <div>Chunks</div>
+    </div>
+    {% for document in documents %}
+    <div class="table-row">
+        <div>{{ document.id }}</div>
+        <div>{{ document.source }}</div>
+        <div>{{ document.doc_type }}</div>
+        <div>{{ document.created_at.strftime("%Y-%m-%d %H:%M") if document.created_at else "n/a" }}</div>
+        <div>{{ document.chunk_count }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">No documents have been ingested yet.</div>
+{% endif %}

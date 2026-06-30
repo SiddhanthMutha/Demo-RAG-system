@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Query | RAG System{% endblock %}
+{% block content %}
+<section class="split">
+    <article class="card">
+        <div class="inline-meta">
+            <span class="pill">HTMX + SSE</span>
+            <span class="pill">Streaming query UI</span>
+        </div>
+        <h2>Query</h2>
+        <p class="muted">Submit a question and watch the answer stream into the page while sources arrive at the end.</p>
+
+        <form
+            hx-post="/web/query/run"
+            hx-target="#query-session"
+            hx-swap="innerHTML"
+        >
+            <label>
+                Query
+                <textarea name="query" placeholder="What would you like to know from the ingested corpus?" required></textarea>
+            </label>
+            <div class="grid two">
+                <label>
+                    Top K
+                    <input type="number" name="top_k" min="1" max="20" value="5">
+                </label>
+                <label>
+                    Model
+                    <select name="model">
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-4">GPT-4</option>
+                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+                    </select>
+                </label>
+            </div>
+            <button type="submit">
+                Stream Answer
+                <span class="htmx-indicator">...</span>
+            </button>
+        </form>
+    </article>
+
+    <aside class="card">
+        <h3>How it works</h3>
+        <div class="list">
+            <div class="result-item">
+                <strong>1. Form post</strong>
+                <p class="muted">HTMX requests a fresh query panel from the server.</p>
+            </div>
+            <div class="result-item">
+                <strong>2. Stream starts</strong>
+                <p class="muted">A small SSE helper connects to the existing streaming endpoint.</p>
+            </div>
+            <div class="result-item">
+                <strong>3. Sources land last</strong>
+                <p class="muted">Retrieved chunks appear after generation completes so the response stays easy to read.</p>
+            </div>
+        </div>
+    </aside>
+</section>
+
+<section id="query-session" class="card">
+    <div class="empty-state">Your streamed response will appear here after you submit a query.</div>
+</section>
+{% endblock %}
