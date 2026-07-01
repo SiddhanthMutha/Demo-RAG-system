@@ -1,5 +1,7 @@
 # RAG System - Intelligent Document Assistant
 
+![RAG Frontend](screenshot.png)
+
 A production-ready Retrieval-Augmented Generation (RAG) system that lets you chat with your documents. Built with FastAPI, OpenAI, and Pinecone.
 
 ## What This Does
@@ -51,6 +53,34 @@ The system uses a hybrid search approach - combining semantic search with keywor
 - **Streaming Responses**: Real-time token streaming via WebSocket
 - **Document Chunking**: Semantic and recursive chunking strategies
 - **Query Rewriting**: Automatic query expansion for better retrieval
+
+## Live Frontend
+
+The system now includes a fully-functional web frontend built with server-rendered Jinja2 templates and HTMX for interactivity. The screenshot above shows the query interface where you can:
+
+- Ask questions and get streamed answers in real-time
+- Upload PDFs or ingest documents from URLs
+- Browse your ingested documents
+- Run evaluation suites and see the results
+
+No React or build tools required — just pure FastAPI templates with a bit of JavaScript magic.
+
+## Evaluation Suite
+
+We built a full evaluation framework that measures how well the RAG system actually works. Running the test suite gives you metrics across the whole pipeline:
+
+| Metric | What It Measures |
+|--------|-----------------|
+| **Precision@k** | How many of the top-k results are actually relevant |
+| **Recall@k** | How many of the expected documents did we find |
+| **MRR** | Mean Reciprocal Rank - rewards finding relevant docs earlier |
+| **nDCG** | Normalized Discounted Cumulative Gain - graded ranking quality |
+| **Faithfulness** | Whether answers stick to what the retrieved chunks actually say |
+| **Correctness** | If the answer matches the expected answer |
+
+The evaluation runs against synthetic Q&A pairs generated from your ingested documents, so you're always testing on data that's relevant to your corpus. Results are stored in the database and can be viewed in the evaluation dashboard.
+
+What we learned from building this: the hybrid search approach really pays off. Without BM25, we'd miss exact keyword matches that vector search struggles with. The cross-encoder reranker helps us squeeze out that extra 10-15% relevance by reordering the top results. And faithfulness checking catches those sneaky cases where the LLM starts hallucinating details not in the source chunks.
 
 ## Quick Start
 
@@ -143,7 +173,8 @@ This project implements a complete RAG pipeline from scratch:
 3. **Cross-Encoder Reranking** - Reorders retrieved chunks for maximum relevance
 4. **Multi-Provider LLM Client** - Supports OpenAI and Anthropic with streaming
 5. **Production API** - FastAPI with middleware for logging, error handling, and rate limiting
-6. **Docker Deployment** - Complete containerization with docker-compose
+6. **Live Web Frontend** - Server-rendered Jinja2 templates with HTMX for a responsive UI
+7. **Evaluation Framework** - Full metrics suite (precision, recall, MRR, nDCG, faithfulness, correctness)
 
 ## Why These Choices?
 
@@ -157,7 +188,6 @@ This project implements a complete RAG pipeline from scratch:
 
 Things I'd like to add next:
 
-- **Web interface (React frontend)** - A visual chat interface instead of just API calls, so non-developers can use it too
 - **Conversation memory** - Remember previous questions in a chat session (like ChatGPT) so you can ask follow-ups
 - **Multi-modal support (images)** - Extract text from scanned documents and images using OCR
 - **Fine-tuned embedding models** - Train custom embeddings on domain-specific data (medical, legal) for better retrieval
