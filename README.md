@@ -80,7 +80,7 @@ We built a full evaluation framework that measures how well the RAG system actua
 
 The evaluation runs against synthetic Q&A pairs generated from your ingested documents, so you're always testing on data that's relevant to your corpus. Results are stored in the database and can be viewed in the evaluation dashboard.
 
-The test suite validates all evaluation components work correctly - **46 evaluation-related tests pass** (precision, recall, MRR, nDCG, harness, judge, repository). Your actual evaluation results will vary based on your document corpus and chosen model.
+The test suite validates all evaluation components work correctly - **46 evaluation-related tests pass** (precision, recall, MRR, nDCG, harness, judge, repository). Your actual evaluation results will vary based on your document corpus and chosen model. To get real numbers: (1) ingest some documents, then (2) hit `/web/eval` in the browser and click "Run Evaluation".
 
 What we learned from building this: the hybrid search approach really pays off. Without BM25, we'd miss exact keyword matches that vector search struggles with. The cross-encoder reranker helps us squeeze out that extra 10-15% relevance by reordering the top results. And faithfulness checking catches those sneaky cases where the LLM starts hallucinating details not in the source chunks.
 
