@@ -2,7 +2,7 @@
 Evaluation metrics for RAG system.
 Implements standard IR and RAG evaluation metrics.
 """
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from src.models import RetrievalResult
